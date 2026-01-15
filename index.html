@@ -29,9 +29,57 @@
             margin: 5px 0;
             color: #666;
         }
+        #filter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 1;
+            font-family: Arial, sans-serif;
+        }
+        #filter h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        #filter label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+            color: #555;
+        }
+        #filter input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+<div id="filter">
+    <h4>Filter by Foundation</h4>
+    <label>
+        <input type="radio" name="foundation" value="all" checked>
+        All
+    </label>
+    <label>
+        <input type="radio" name="foundation" value="Capuana">
+        Capuana <span style="color: #4A90E2;">●</span>
+    </label>
+    <label>
+        <input type="radio" name="foundation" value="Portanova">
+        Portanova <span style="color: #E24A90;">●</span>
+    </label>
+    <label>
+        <input type="radio" name="foundation" value="Porto">
+        Porto <span style="color: #90E24A;">●</span>
+    </label>
+    <label>
+        <input type="radio" name="foundation" value="Nido">
+        Nido <span style="color: #E2904A;">●</span>
+    </label>
+</div>
 <div id="info"></div>
 <div id="map"></div>
 <script>
@@ -75,7 +123,7 @@
                             'Portanova', '#E24A90',    // Pink
                             'Porto', '#90E24A',        // Green
                             'Nido', '#E2904A',         // Orange
-                            'Montagna', '#9B4AE2',      // Purple/Lila
+                            'Montana', '#9B4AE2',      // Purple/Lila
                             '#CCCCCC'                  // Default gray
                         ],
                         'fill-extrusion-opacity': 0.8,
@@ -121,6 +169,25 @@
 
                 map.on('mouseleave', 'chiesuole-fill', () => {
                     map.getCanvas().style.cursor = '';
+                });
+
+                // Add filter functionality
+                const filterRadios = document.querySelectorAll('input[name="foundation"]');
+                filterRadios.forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        const selectedFoundation = e.target.value;
+
+                        if (selectedFoundation === 'all') {
+                            // Show all features
+                            map.setFilter('chiesuole-fill', null);
+                            map.setFilter('chiesuole-labels', null);
+                        } else {
+                            // Filter by selected foundation
+                            const filter = ['==', ['get', 'foundation'], selectedFoundation];
+                            map.setFilter('chiesuole-fill', filter);
+                            map.setFilter('chiesuole-labels', filter);
+                        }
+                    });
                 });
             })
             .catch(error => {
