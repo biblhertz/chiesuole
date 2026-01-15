@@ -62,27 +62,25 @@
                     data: geojson
                 });
 
-                // Add 3D fill-extrusion layer
+                // Add 3D fill-extrusion layer with color by foundation
                 map.addLayer({
                     id: 'chiesuole-fill',
                     type: 'fill-extrusion',
                     source: 'chiesuole',
                     paint: {
-                        'fill-extrusion-color': 'orange',
+                        'fill-extrusion-color': [
+                            'match',
+                            ['get', 'foundation'],
+                            'Capuana', '#4A90E2',      // Blue
+                            'Portanova', '#E24A90',    // Pink
+                            'Porto', '#90E24A',        // Green
+                            'Nido', '#E2904A',         // Orange
+                            'Montana', '#9B4AE2',      // Purple/Lila
+                            '#CCCCCC'                  // Default gray
+                        ],
                         'fill-extrusion-opacity': 0.8,
                         'fill-extrusion-height': 20,
                         'fill-extrusion-base': 0
-                    }
-                });
-
-                // Add outline layer
-                map.addLayer({
-                    id: 'chiesuole-outline',
-                    type: 'line',
-                    source: 'chiesuole',
-                    paint: {
-                        'line-color': 'gray',
-                        'line-width': 2
                     }
                 });
 
