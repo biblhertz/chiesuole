@@ -9,6 +9,26 @@
     <style>
         body { margin: 0; padding: 0; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        #info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            max-width: 300px;
+            z-index: 1;
+            font-family: Arial, sans-serif;
+        }
+        #info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        #info p {
+            margin: 5px 0;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -22,6 +42,7 @@
         projection: 'mercator',
         zoom: 16,
         center: [14.261, 40.849],
+        pitch: 45,
         hash: true
     });
 
@@ -41,14 +62,16 @@
                     data: geojson
                 });
 
-                // Add fill layer
+                // Add 3D fill-extrusion layer
                 map.addLayer({
                     id: 'chiesuole-fill',
-                    type: 'fill',
+                    type: 'fill-extrusion',
                     source: 'chiesuole',
                     paint: {
-                        'fill-color': 'orange',
-                        'fill-opacity': 0.5
+                        'fill-extrusion-color': 'orange',
+                        'fill-extrusion-opacity': 0.8,
+                        'fill-extrusion-height': 20,
+                        'fill-extrusion-base': 0
                     }
                 });
 
@@ -81,18 +104,16 @@
                     }
                 });
 
-                // Add click event to show popup with info
+                // Add click event to show info in the info div
                 map.on('click', 'chiesuole-fill', (e) => {
                     const props = e.features[0].properties;
-                    new mapboxgl.Popup()
-                        .setLngLat(e.lngLat)
-                        .setHTML(`
-                            <strong>${props.name}</strong><br>
-                            Number: ${props.number}<br>
-                            Period: ${props.startdate} - ${props.enddate}<br>
-                            Foundation: ${props.foundation}
-                        `)
-                        .addTo(map);
+                    const infoDiv = document.getElementById('info');
+                    infoDiv.innerHTML = `
+                        <h3>${props.name}</h3>
+                        <p><strong>Number:</strong> ${props.number}</p>
+                        <p><strong>Period:</strong> ${props.startdate} - ${props.enddate}</p>
+                        <p><strong>Foundation:</strong> ${props.foundation}</p>
+                    `;
                 });
 
                 // Change cursor on hover
