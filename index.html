@@ -1,11 +1,8 @@
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Guides</title>
+    <title>Chiesuole</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.js"></script>
@@ -15,23 +12,101 @@
     </style>
 </head>
 <body>
+<div id="info"></div>
 <div id="map"></div>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1Ijoia2V3ZXJuZXIiLCJhIjoiY2lqMGprNjVmMDA0NnYwbTVibHh5bWx6aSJ9.zB8-7hnUeIeYJsqzOjJ2Fg';
     const map = new mapboxgl.Map({
         container: 'map',
-        style:  'mapbox://styles/kewerner/cm5z2km5m001f01sf3b184ubc',
-        //style: 'mapbox://styles/mapbox/standard', // Use the standard style for the map
-        projection: 'mercator', // display the map as a globe
-        zoom: 14, // initial zoom level, 0 is the world view, higher values zoom in
-        center: [14.25, 40.85] // center the map on this longitude and latitude
+        style:  'mapbox://styles/kewerner/cmkfi9ew8000z01qvgxso63sf',
+        projection: 'mercator',
+        zoom: 16,
+        center: [14.261, 40.849],
+        hash: true
     });
 
     map.addControl(new mapboxgl.NavigationControl());
     map.scrollZoom.disable();
 
     map.on('style.load', () => {
-        map.setFog({}); // Set the default atmosphere style
+        map.setFog({});
+
+        // Load the GeoJSON data
+        fetch('chiesuole.geojson')
+            .then(response => response.json())
+            .then(geojson => {
+                // Add source
+                map.addSource('chiesuole', {
+                    type: 'geojson',
+                    data: geojson
+                });
+
+                // Add fill layer
+                map.addLayer({
+                    id: 'chiesuole-fill',
+                    type: 'fill',
+                    source: 'chiesuole',
+                    paint: {
+                        'fill-color': 'orange',
+                        'fill-opacity': 0.5
+                    }
+                });
+
+                // Add outline layer
+                map.addLayer({
+                    id: 'chiesuole-outline',
+                    type: 'line',
+                    source: 'chiesuole',
+                    paint: {
+                        'line-color': 'gray',
+                        'line-width': 2
+                    }
+                });
+
+                // Add label layer
+                map.addLayer({
+                    id: 'chiesuole-labels',
+                    type: 'symbol',
+                    source: 'chiesuole',
+                    layout: {
+                        'text-field': ['get', 'name'],
+                        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        'text-size': 12,
+                        'text-anchor': 'center'
+                    },
+                    paint: {
+                        'text-color': '#000',
+                        'text-halo-color': '#fff',
+                        'text-halo-width': 2
+                    }
+                });
+
+                // Add click event to show popup with info
+                map.on('click', 'chiesuole-fill', (e) => {
+                    const props = e.features[0].properties;
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML(`
+                            <strong>${props.name}</strong><br>
+                            Number: ${props.number}<br>
+                            Period: ${props.startdate} - ${props.enddate}<br>
+                            Foundation: ${props.foundation}
+                        `)
+                        .addTo(map);
+                });
+
+                // Change cursor on hover
+                map.on('mouseenter', 'chiesuole-fill', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.on('mouseleave', 'chiesuole-fill', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+            })
+            .catch(error => {
+                console.error('Error loading GeoJSON:', error);
+            });
     });
 </script>
 
